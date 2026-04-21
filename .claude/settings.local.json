@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:marketplace.visualstudio.com)",
+      "WebFetch(domain:www.lemon64.com)",
+      "WebFetch(domain:retrogamecoders.com)"
+    ]
+  }
+}

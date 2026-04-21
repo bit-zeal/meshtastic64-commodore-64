@@ -1,0 +1,15 @@
+# Build output
+build/
+
+# Temporary and backup files
+*.json~
+*~
+
+# VS Code workspace files (optional - some people like to share these)
+.vscode/
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Mac junk (in case you ever work on a Mac)
+.DS_Store

@@ -1,0 +1,13 @@
+{
+    "name": "mesh c64",
+    "description": "meshtastic 64 software for the Commodore 64",
+    "toolkit": "basic",
+    "sources": [
+        "src/main.bas"
+    ],
+    "build": "debug",
+    "definitions": [],
+    "includes": [],
+    "args": [],
+    "compiler": ""
+}
