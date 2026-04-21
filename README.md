@@ -24,6 +24,12 @@ Meshtastic 64 establishes a two-way text link between a Commodore 64 and a Mesht
 
 ---
 
+## Releases
+
+Pre-built `.prg` files are available on the [GitHub Releases page](https://github.com/bit-zeal/meshtastic64/releases/latest) — no build tools required.
+
+---
+
 ## How It Works
 
 The program is structured as a polling loop:
@@ -98,7 +104,7 @@ Nine PETSCII art slots (1–9) are available in memory. The editor uses a separa
 
 ---
 
-## Customization
+## Fun Customization
 
 ### LED Blinking Pattern
 
@@ -126,12 +132,6 @@ To change the pattern, edit the `ld()` values and the `ld` step count in `initCo
 - **Two LEDs at once:** Use values like `096` (`%01100000`) or `006` (`%00000110`).
 - **Fewer steps:** Lower `ld` — e.g., `ld = 2` uses only `ld(0)`..`ld(2)`.
 - **More steps:** Increase `ld` and add matching `ld(n)` entries (array is dimensioned at 6 in `dim ld(6)`; add `dim ld(n)` with a larger `n` if needed).
-
----
-
-## Releases
-
-Pre-built `.prg` files are available on the [GitHub Releases page](https://github.com/bit-zeal/meshtastic64/releases/latest) — no build tools required.
 
 ---
 
