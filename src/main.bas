@@ -76,7 +76,7 @@ dingSound:
 initComputer:
 #lineskip 500
 	rem **init computer**
-	dim og$(6) : dim ic$(6) : dim ld(6) : dim ps$(9) : dim ps(9)
+	dim ld(20) : dim ps$(9) : dim ps(9)
 	ss = 0 : rem sound state (1=on, 0=off)
 	poke 53280,11 : poke 53281,00 : print"{clear}{lightgreen}"chr$(142);
 	for i = 1 to 40*6 : print chr$(205.5+rnd(1)); : next
@@ -93,7 +93,7 @@ initComputer:
 	ld(3) = 008 : rem x000100x
 	ld(4) = 004 : rem x000010x
 	ld(5) = 002 : rem x000001x
-	ld = 5 : rem number of LED light steps
+	ld = 5 : rem number of LED light steps up to 20
 	return
 	:
 	:
@@ -115,7 +115,7 @@ convertINstingToMSstringAndStore:
 	if len(ms$) < 7 then ms$ = ms$ + "{7 space}"
 	ms$ = left$(ms$,4) + "{rvof} {grey}" + right$(ms$,len(ms$)-6)
 	ms$ = "{lightgreen}{rvon}" + ms$
-	bc = 0 : in$ = "" : rem reset for next message
+	bc = 0 : in$ = "" : ic = 0 : rem reset for next message
 	im$(im) = ms$ : im = im + 1  
 	return
 	:
@@ -144,12 +144,7 @@ readSerialInputAndConvertToPetscii:
 	rem ***read serial input and convert to petscii***
 	get#2, rb$ : rem get read byte
 	if rb$ = "" then return : rem ignore null values
-#	rem if ej = 1 or asc(rb$)=226 or asc(rb$)=240 then processEmoji : rem emoji
-#	rem if (ic = 1) or (bc = 0 and rb$ = chr$(27)) then incommingCommands : rem commands
 	if bc = 0 and (rb$ = chr$(13) or rb$ = chr$(10)) then return : rem skip
-	rem if rb$ = chr$(10) then goto convertINstingToMSstringAndStore : rem process input and prep print
-	rem readSerialColonHandling:
-	rem if rb$ = ":" and bc < 4 then in$ = " " + in$ : bc = bc + 1 : goto readSerialColonHandling
 	if bc = 6 and rb$ = chr$(27) then ic = 1
 	if ic = 1 and rb$ = chr$(96) then in$ = in$ + chr$(96) : goto convertINstingToMSstringAndStore
 	if ic = 1 then nc$ = rb$ : goto readSerialFinish
@@ -170,15 +165,6 @@ readSerialInputAndConvertToPetscii:
 	return
 	:
 	:
-#
-#
-#processEmoji:
-#	rem **process emoji**
-#	return
-#	ej$ = ej$ + rb$ : ej = 1
-#	ifej$ = eu$$(240)+chr$(159)+chr$(145)+chr$(141) then in$
-#	:
-#	:
 
 
 readKeyboard:
@@ -197,6 +183,7 @@ readKeyboard:
 	return
 	:
 	:
+
 
 reprintInputString:
 #lineskip 500
@@ -252,14 +239,13 @@ redrawInputBox:
     :
     :
 
+
 updateScreen:
 #lineskip 500
     rem *update screen*
     for i = 1 to 2 : poke 781,22+i : sys59903 : next i : rem erase input area
     for i = 1 to 7 : poke 216+i,132 :next i : rem unlink top lines b4 scroll
     if right$(in$,1) = chr$(13) then ms$ = left$(ms$,len(ms$)-1)
-#   if len(ms$) > 40 then ms$=ms$+"{4 down}"
-#   if len(ms$) < 40 then ms$=ms$+"{4 down}"
 	ms$=ms$+"{4 down}"
     if len(ms$) > 251 then ms$=left(ms$,251) + "{4 down}"
     print"{home}{21 down}{grey}{rvof}";ms$;
@@ -267,56 +253,31 @@ updateScreen:
     return
     :
     :
-#
-#
-#incommingCommands:
-##lineskip 500
-#   rem *incmg commds (petscii art)*
-#   print"{home}{4 down}incomming commands"
-#   ic = 1
-#   if rb$ = chr$(10) goto 37050
-#	ic$ = ic$ + rb$
-#	return
-#   :
-#	:
-#
-#
-#endOfCommand:
-#lineskip 500
-#37050 :
-#	rem *end of command*
-#	im$(im) = ic$ : im = im + 1
-#	ic$ = "" : ic = 0
-#	return
-#    :
-#    :
-
 
 printPetsciiArt:
 #lineskip 500
     rem ***print petscii art***
     if im = 0 then return :rem no msg
-    rem if im$="" then return :rem no msg
     if pp = 1 then goto printPetsciiArtNext
     if asc(mid$(im$(im-1),10,1)) <> 27 then return
-    if mid$(im$(im-1),11,1) = "p" then pp = 1
+    if mid$(im$(im-1),11,1) = "p" then pp = 1 : pj = im - 1
 	printPetsciiArtNext:
     if dp = 1 then endPetsciiView
     ms$="received petscii art - press f1 to view{up}" : gosub updateScreen
     get a$ : if a$ <> "{f1}" then return
     print"{clear}"+chr$(142)
     dp = 1
-    xc=asc(mid$(im$(im-1),12,1)) : yc=asc(mid$(im$(im-1),13,1))
+    xc=asc(mid$(im$(pj),12,1)) : yc=asc(mid$(im$(pj),13,1))
     pc = 14 : xo = int((40-xc)/2) : yo = int((25-yc)/2)
     for y = 0 to yc-1
 		for x = 0 to xc-1
-    		poke 1024+x+xo+(y+yo)*40,asc(mid$(im$(im-1),pc,1))
+    		poke 1024+x+xo+(y+yo)*40,asc(mid$(im$(pj),pc,1))
     		pc = pc + 1
     	next x
     next y
     for y = 0 to yc-1
 		for x = 0 to xc-1
-    		poke 55296+x+xo+(y+yo)*40,asc(mid$(im$(im-1),pc,1))
+    		poke 55296+x+xo+(y+yo)*40,asc(mid$(im$(pj),pc,1))
     		pc = pc + 1
     	next x
     next y
@@ -333,14 +294,14 @@ endPetsciiView:
 	if a$<>"{f7}" and (asc(a$)< 48 or asc(a$) > 57) then return
 	if a$ = "{f7}" then ms$ = "" : goto endPetsciiViewExit
 	sl = asc(a$)-48
-	ps$(sl) = right$(im$(im-1),len(im$(im-1))-9)
+	ps$(sl) = right$(im$(pj),len(im$(pj))-9)
 	ps(sl) = 1
 	ms$ = "<petscii: stored slot"+str$(sl)+">"
 	endPetsciiViewExit:
 	rem *clean up and end*
 	pp = 0 : dp = 0 : a$="" : ic = 0
 	im = im - 1
-	for i = 0 to (im-1)
+	for i = pj to (im-1)
 		im$(i) = im$(i+1)
 	next
 	print "{clear}" + chr$(14) : rem clear and lower case
@@ -428,7 +389,6 @@ petsciiEditDrawingExisting:
 	if ea < 0 or ea > 9 then return
 	if ps(ea) = 0 then return
 	for i = 0 to 2 : poke 781,i : sys 59903 : next i : rem erase input area
-	dp = 1
 	xc=asc(mid$(ps$(ea),3,1)) : yc=asc(mid$(ps$(ea),4,1))
 	pc = 5
 	for y = 0 to yc-1
@@ -532,8 +492,8 @@ petsciiScreenReader:
 listHelp:
 #lineskip 500
     rem *list commands*
-    ms$ = "** meshtastic 64 **" : gosub updateScreen
-    ms$ = "text<return> [send text over primary]" : gosub updateScreen
+    ms$ = "** meshtastic 64 control **" : gosub updateScreen
+    ms$ = "any text {rvon}[send text over primary]" : gosub updateScreen
     ms$ = "/? {rvon}[help]" : gosub updateScreen
     ms$ = "/p edit {rvon}[petscii edit from blank]" : gosub updateScreen
     ms$ = "/p edit n {rvon}[petscii edit with slot n]" : gosub updateScreen
